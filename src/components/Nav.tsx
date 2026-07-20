@@ -31,10 +31,10 @@ export function Nav() {
             <LogoMark size={40} className="shadow-md shadow-teal-900/10" />
             <div>
               <p className="text-sm font-semibold tracking-tight text-stone-900 leading-tight">
-                Agenda Consultorio
+                Auralis
               </p>
               <p className="text-[11px] font-medium text-teal-700/80 leading-tight">
-                Consultorio · Pericias
+                Turnos · Consultorio · Pericias
               </p>
             </div>
           </div>

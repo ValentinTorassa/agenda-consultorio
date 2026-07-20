@@ -1,4 +1,4 @@
-# Agenda Consultorio
+# Auralis - Turnos y Consultorio
 
 **Producción:** https://turnos.valentorassa.com
 
@@ -9,7 +9,8 @@ Pensada para reemplazar la agenda en papel: turnos visuales, tareas del día, fi
 
 ## Stack
 
-- **Next.js 15** + TypeScript + Tailwind
+- **Next.js 16** + TypeScript + Tailwind
+- **Expo / React Native** para Android, iPhone y tablet
 - **Convex** (base de datos reactiva, auth, crons, sync en tiempo real)
 - UI en **español (Argentina)**
 - PWA liviana (instalable en celular / iPad)
@@ -37,8 +38,8 @@ Pensada para reemplazar la agenda en papel: turnos visuales, tareas del día, fi
 ## Setup local
 
 ```bash
-git clone https://github.com/ValentinTorassa/agenda-consultorio.git
-cd agenda-consultorio
+git clone https://github.com/ValentinTorassa/Auralis-Turnos-Consultorio.git
+cd Auralis-Turnos-Consultorio
 npm install
 ```
 
@@ -51,7 +52,7 @@ npx convex dev
 ```
 
 - Iniciá sesión en Convex
-- Creá un proyecto (ej. `agenda-consultorio`)
+- Creá un proyecto Convex para Auralis
 - Esto escribe `.env.local` con `NEXT_PUBLIC_CONVEX_URL`
 
 En **otra** terminal (misma carpeta), configurá auth:
@@ -75,6 +76,19 @@ Abrí [http://localhost:3000](http://localhost:3000)
 1. **Crear cuenta** (email + contraseña)
 2. La app siembra sola los tipos de turno y la configuración
 3. Empezá a cargar pacientes y turnos
+
+### 3. Arrancar la app mobile
+
+```bash
+cd mobile
+npm install
+cp .env.example .env.local
+cd ..
+npm run mobile
+```
+
+`EXPO_PUBLIC_CONVEX_URL` debe apuntar al mismo deployment Convex que usa la
+web. La cuenta, los turnos, pacientes y tareas se sincronizan automáticamente.
 
 ## Deploy (producción)
 
@@ -122,10 +136,11 @@ custom domain del proyecto en Vercel.
 ## Estructura
 
 ```
-app/(app)/          # Pantallas autenticadas
-app/(auth)/login    # Login / registro
-components/         # UI y formularios
-convex/             # Schema, queries, mutations, crons
+src/app/             # Aplicación web Next.js
+src/components/      # UI web
+mobile/src/app/      # Aplicación Expo Router
+mobile/src/components/ # UI nativa
+convex/              # Backend compartido y paquete @auralis/backend
 ```
 
 ## Privacidad

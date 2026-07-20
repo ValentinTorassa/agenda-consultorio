@@ -1,6 +1,6 @@
 {
-  "name": "Agenda Consultorio",
-  "short_name": "Agenda",
+  "name": "Auralis - Turnos y Consultorio",
+  "short_name": "Auralis",
   "description": "Agenda digital personal para consultorio psicológico",
   "start_url": "/",
   "display": "standalone",

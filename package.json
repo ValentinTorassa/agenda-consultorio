@@ -1,5 +1,5 @@
 {
-  "name": "agenda-consultorio",
+  "name": "auralis-turnos-consultorio",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,8 +7,12 @@
     "dev:backend": "convex dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "convex:deploy": "convex deploy"
+    "lint": "eslint src convex && npm --prefix mobile run lint",
+    "convex:deploy": "convex deploy",
+    "mobile": "npm --prefix mobile start",
+    "mobile:android": "npm --prefix mobile run android",
+    "mobile:ios": "npm --prefix mobile run ios",
+    "mobile:typecheck": "npm --prefix mobile exec tsc -- --noEmit"
   },
   "dependencies": {
     "@auth/core": "^0.41.2",

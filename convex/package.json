@@ -1,0 +1,12 @@
+{
+  "name": "@auralis/backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api": {
+      "types": "./_generated/api.d.ts",
+      "default": "./_generated/api.js"
+    }
+  }
+}

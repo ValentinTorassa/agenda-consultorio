@@ -65,11 +65,11 @@ export default function LoginPage() {
               <LogoMark size={64} />
             </div>
             <h1 className="text-2xl font-semibold tracking-tight text-stone-900">
-              Agenda Consultorio
+              Auralis
             </h1>
             <p className="mt-1.5 flex items-center justify-center gap-1.5 text-sm text-stone-500">
               <Sparkles className="h-3.5 w-3.5 text-amber-500" />
-              Tu día, claro y a mano
+              Turnos y consultorio, claros y a mano
             </p>
           </div>
 

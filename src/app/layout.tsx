@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Agenda Consultorio",
+  title: "Auralis",
   description:
     "Agenda digital personal para consultorio psicológico: turnos, pacientes, tareas y recordatorios.",
   appleWebApp: {
