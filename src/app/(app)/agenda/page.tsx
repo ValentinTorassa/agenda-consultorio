@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { DayTimeline } from "@/components/DayTimeline";
 import { AppointmentForm } from "@/components/AppointmentForm";
+import { TaskPanel } from "@/components/TaskPanel";
 import { Button, Card, Empty, Modal } from "@/components/ui";
 import {
   addDays,
@@ -168,19 +169,26 @@ export default function AgendaPage() {
       </div>
 
       {view === "day" && (
-        <DayTimeline
-          appointments={dayAppointments}
-          workStart={workStart}
-          workEnd={workEnd}
-          isToday={cursor === todayKey()}
-          onSelect={(id) => setEditId(id as Id<"appointments">)}
-          onSlotClick={(hour, minute = 0) => {
-            setDefaultTime(
-              `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
-            );
-            setOpenNew(true);
-          }}
-        />
+        <div className="grid items-start gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(19rem,1fr)]">
+          <div className="order-2 min-w-0 lg:order-1">
+            <DayTimeline
+              appointments={dayAppointments}
+              workStart={workStart}
+              workEnd={workEnd}
+              isToday={cursor === todayKey()}
+              onSelect={(id) => setEditId(id as Id<"appointments">)}
+              onSlotClick={(hour, minute = 0) => {
+                setDefaultTime(
+                  `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`,
+                );
+                setOpenNew(true);
+              }}
+            />
+          </div>
+          <div className="order-1 lg:sticky lg:top-36 lg:order-2">
+            <TaskPanel date={cursor} onDateChange={setCursor} />
+          </div>
+        </div>
       )}
 
       {view === "week" && (

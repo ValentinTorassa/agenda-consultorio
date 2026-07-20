@@ -5,16 +5,40 @@ import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 import { Button, Card, Empty, Input } from "./ui";
 import { IconBadge } from "./Icons";
-import { Check, ListTodo, Plus, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import {
+  CalendarDays,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  ListTodo,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { addDays, cn, todayKey } from "@/lib/utils";
 
-export function TaskPanel({ date }: { date: string }) {
+function shortLabel(date: string): string {
+  return new Intl.DateTimeFormat("es-AR", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  }).format(new Date(`${date}T12:00:00-03:00`));
+}
+
+export function TaskPanel({
+  date,
+  onDateChange,
+}: {
+  date: string;
+  onDateChange?: (date: string) => void;
+}) {
   const tasks = useQuery(api.tasks.byDate, { date }) ?? [];
   const create = useMutation(api.tasks.create);
   const toggle = useMutation(api.tasks.toggle);
   const remove = useMutation(api.tasks.remove);
   const [title, setTitle] = useState("");
   const [adding, setAdding] = useState(false);
+
+  const isToday = date === todayKey();
 
   async function addTask(e: React.FormEvent) {
     e.preventDefault();
@@ -36,9 +60,9 @@ export function TaskPanel({ date }: { date: string }) {
         <IconBadge tone="violet" className="h-9 w-9 rounded-xl">
           <ListTodo className="h-4 w-4" />
         </IconBadge>
-        <div>
+        <div className="min-w-0 flex-1">
           <h2 className="text-base font-semibold text-stone-900">
-            Tareas del día
+            {isToday ? "Tareas de hoy" : "Tareas"}
           </h2>
           <p className="text-xs text-stone-500">
             {pending === 0
@@ -50,11 +74,55 @@ export function TaskPanel({ date }: { date: string }) {
         </div>
       </div>
 
+      {onDateChange && (
+        <div className="mb-4 flex items-center gap-1.5 rounded-2xl bg-stone-100/80 p-1 ring-1 ring-stone-200/60">
+          <button
+            type="button"
+            onClick={() => onDateChange(addDays(date, -1))}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-stone-500 transition hover:bg-white hover:text-stone-900 hover:shadow-sm"
+            aria-label="Día anterior"
+          >
+            <ChevronLeft className="h-4.5 w-4.5" />
+          </button>
+          <label className="flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-xl bg-white px-2 shadow-sm">
+            <CalendarDays className="h-4 w-4 shrink-0 text-violet-600" />
+            <span className="sr-only">Fecha de las tareas</span>
+            <input
+              type="date"
+              value={date}
+              onChange={(event) => onDateChange(event.target.value)}
+              className="h-9 min-w-0 flex-1 bg-transparent text-sm font-semibold text-stone-800 outline-none"
+            />
+          </label>
+          <button
+            type="button"
+            onClick={() => onDateChange(addDays(date, 1))}
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-stone-500 transition hover:bg-white hover:text-stone-900 hover:shadow-sm"
+            aria-label="Día siguiente"
+          >
+            <ChevronRight className="h-4.5 w-4.5" />
+          </button>
+          {!isToday && (
+            <button
+              type="button"
+              onClick={() => onDateChange(todayKey())}
+              className="shrink-0 rounded-xl bg-white px-2.5 py-1.5 text-xs font-semibold text-teal-700 shadow-sm ring-1 ring-teal-100 transition hover:bg-teal-50"
+            >
+              Volver a hoy
+            </button>
+          )}
+        </div>
+      )}
+
       <form onSubmit={addTask} className="mb-4 flex gap-2">
         <Input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Ej. Llamar al abogado..."
+          placeholder={
+            isToday
+              ? "Ej. Llamar al abogado..."
+              : `Tarea para ${shortLabel(date)}...`
+          }
         />
         <Button
           type="submit"
@@ -68,7 +136,14 @@ export function TaskPanel({ date }: { date: string }) {
       </form>
 
       {tasks.length === 0 ? (
-        <Empty title="Sin tareas" hint="Agregá lo que no querés olvidar hoy" />
+        <Empty
+          title="Sin tareas"
+          hint={
+            isToday
+              ? "Agregá lo que no querés olvidar hoy"
+              : "Agregá lo que no querés olvidar ese día"
+          }
+        />
       ) : (
         <ul className="space-y-2">
           {tasks.map((t) => (

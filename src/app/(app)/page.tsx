@@ -138,6 +138,7 @@ export default function HomePage() {
   const [openNew, setOpenNew] = useState(false);
   const [openReminder, setOpenReminder] = useState(false);
   const [editId, setEditId] = useState<Id<"appointments"> | null>(null);
+  const [taskDate, setTaskDate] = useState(() => todayKey());
 
   const appointments = useMemo(() => summary?.appointments ?? [], [summary]);
   const loading = summary === undefined;
@@ -349,7 +350,7 @@ export default function HomePage() {
         </div>
 
         <div className="lg:col-span-2 space-y-5">
-          <TaskPanel date={date} />
+          <TaskPanel date={taskDate} onDateChange={setTaskDate} />
 
           <Card className="p-4 sm:p-5">
             <div className="mb-3 flex items-center justify-between gap-2">
