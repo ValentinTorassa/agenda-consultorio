@@ -1,5 +1,5 @@
 import { ConvexQueryClient } from "@convex-dev/react-query";
-import { QueryClient } from "@tanstack/react-query";
+import { environmentManager, QueryClient } from "@tanstack/react-query";
 
 const convexClients = new WeakMap<QueryClient, ConvexQueryClient>();
 let browserQueryClient: QueryClient | undefined;
@@ -23,7 +23,7 @@ function makeQueryClient(convexUrl: string): QueryClient {
 }
 
 export function getQueryClient(convexUrl: string): QueryClient {
-  if (typeof window === "undefined") {
+  if (environmentManager.isServer()) {
     return makeQueryClient(convexUrl);
   }
 
