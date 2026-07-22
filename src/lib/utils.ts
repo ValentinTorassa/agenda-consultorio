@@ -37,6 +37,16 @@ export function parseDateKey(dateStr: string): Date {
   return new Date(`${dateStr}T12:00:00${BUENOS_AIRES_OFFSET}`);
 }
 
+export function isValidDateKey(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return false;
+  const parsed = parseDateKey(value);
+  return !Number.isNaN(parsed.getTime()) && dateKeyFromDate(parsed) === value;
+}
+
 export function todayKey(timeZone = BUENOS_AIRES_TIME_ZONE): string {
   return dateKeyFromDate(new Date(), timeZone);
 }

@@ -6,7 +6,7 @@ import { api } from "../../convex/_generated/api";
 import { useEffect, useRef } from "react";
 
 export function SeedOnLogin() {
-  const ensureSeeded = useMutation({
+  const { mutateAsync: ensureSeeded } = useMutation({
     mutationFn: useConvexMutation(api.users.ensureSeeded),
   });
   const ran = useRef(false);
@@ -14,7 +14,7 @@ export function SeedOnLogin() {
   useEffect(() => {
     if (ran.current) return;
     ran.current = true;
-    void ensureSeeded.mutateAsync({}).catch(() => {
+    void ensureSeeded({}).catch(() => {
       ran.current = false;
     });
   }, [ensureSeeded]);

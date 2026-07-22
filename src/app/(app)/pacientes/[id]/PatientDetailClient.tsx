@@ -279,7 +279,7 @@ export function PatientDetailClient({ id: rawId }: { id: string }) {
 
       <Card className="p-5">
         <h2 className="mb-4 text-base font-semibold">Ficha administrativa</h2>
-        <PatientForm key={patient._id} id={id} patient={patient} />
+        <PatientForm key={patient._id} id={patient._id} patient={patient} />
       </Card>
 
       <section>

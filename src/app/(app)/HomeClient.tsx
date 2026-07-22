@@ -47,6 +47,7 @@ import {
 import { useMemo, useState } from "react";
 import { Id } from "../../../convex/_generated/dataModel";
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 
 function greeting(now: number): string {
   if (now === 0) return "Hoy";
@@ -230,11 +231,12 @@ export function HomeClient() {
             <CalendarPlus className="h-5 w-5" />
             Turno
           </Button>
-          <Link href="/agenda">
-            <Button variant="outline" size="lg">
-              <CalendarClock className="h-5 w-5" />
-              Agenda
-            </Button>
+          <Link
+            href="/agenda"
+            className={buttonVariants({ variant: "outline", size: "lg" })}
+          >
+            <CalendarClock data-icon="inline-start" className="h-5 w-5" />
+            Agenda
           </Link>
         </div>
       </section>
