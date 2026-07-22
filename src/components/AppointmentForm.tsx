@@ -20,7 +20,6 @@ import {
   addDays,
   formatDateTime,
   parseLocalDateTime,
-  todayKey,
 } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 
@@ -38,29 +37,6 @@ type Appt = {
   status: "confirmed" | "cancelled" | "no_show" | "completed";
   reminderEnabled: boolean;
 };
-
-type AppointmentDraft = {
-  patientId?: Id<"patients">;
-  typeId: string;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  endsNextDay: boolean;
-  notes: string;
-  paymentStatus: Appt["paymentStatus"];
-  paymentMethod: string;
-  paymentNotes: string;
-  status: Appt["status"];
-  reminder: boolean;
-};
-
-function appointmentDraftReducer(
-  state: AppointmentDraft,
-  patch: Partial<AppointmentDraft>,
-): AppointmentDraft {
-  return { ...state, ...patch };
-}
 
 export type AppointmentFormResult = {
   id: Id<"appointments">;
