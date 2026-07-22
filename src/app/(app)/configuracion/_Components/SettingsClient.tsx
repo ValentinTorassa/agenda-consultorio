@@ -2,8 +2,8 @@
 
 import { useConvex, useMutation, useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
-import { api } from "../../../../convex/_generated/api";
-import { Doc } from "../../../../convex/_generated/dataModel";
+import { api } from "../../../../../convex/_generated/api";
+import { Doc } from "../../../../../convex/_generated/dataModel";
 import { Button, Card, Input, Label, Skeleton } from "@/components/ui";
 import { IconBadge } from "@/components/Icons";
 import {
@@ -27,7 +27,7 @@ import {
   BackupSnapshot,
   backupCounts,
   validateBackupSnapshot,
-} from "../../../../convex/backupModel";
+} from "../../../../../convex/backupModel";
 import {
   MAX_ENCRYPTED_BACKUP_BYTES,
   decryptBackup,

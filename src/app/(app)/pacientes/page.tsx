@@ -1,4 +1,4 @@
-import { PatientsClient } from "./PatientsClient";
+import { PatientsClient } from "./_Components/PatientsClient";
 import { patientListSearchParamsCache } from "@/lib/search-params.server";
 import type { SearchParams } from "nuqs/server";
 

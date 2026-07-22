@@ -1,4 +1,4 @@
-import { AgendaClient } from "./AgendaClient";
+import { AgendaClient } from "./_Components/AgendaClient";
 import { agendaSearchParamsCache } from "@/lib/search-params.server";
 import type { SearchParams } from "nuqs/server";
 

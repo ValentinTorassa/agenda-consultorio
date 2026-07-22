@@ -13,8 +13,8 @@ import {
   UserRoundPen,
   UserRoundX,
 } from "lucide-react";
-import { api } from "../../../../convex/_generated/api";
-import { Id } from "../../../../convex/_generated/dataModel";
+import { api } from "../../../../../convex/_generated/api";
+import { Id } from "../../../../../convex/_generated/dataModel";
 import { AppointmentModal } from "@/components/AppointmentForm";
 import { IconBadge } from "@/components/Icons";
 import { PatientPicker } from "@/components/PatientPicker";

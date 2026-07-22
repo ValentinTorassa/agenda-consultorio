@@ -27,7 +27,7 @@ export function LoginFormClient() {
   const [loading, startTransition] = useTransition();
   const { error, showPassword } = state;
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     formData.set("email", String(formData.get("email") ?? "").trim());

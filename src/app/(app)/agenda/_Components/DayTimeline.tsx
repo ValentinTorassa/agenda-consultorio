@@ -7,7 +7,7 @@ import {
 } from "@/lib/agenda";
 import { cn, formatTime, getCalendarRange, minutesInDay } from "@/lib/utils";
 import { useNow } from "@/lib/useNow";
-import { Badge } from "./ui";
+import { Badge } from "@/components/ui";
 import { useEffect, useRef } from "react";
 
 type Appt = {

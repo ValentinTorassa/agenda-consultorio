@@ -1,4 +1,4 @@
-import { PatientDetailClient } from "./PatientDetailClient";
+import { PatientDetailClient } from "./_Components/PatientDetailClient";
 
 export default async function PacienteDetailPage({
   params,

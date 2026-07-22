@@ -2,8 +2,8 @@
 
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { api } from "../../../../convex/_generated/api";
-import { DayTimeline } from "@/components/DayTimeline";
+import { api } from "../../../../../convex/_generated/api";
+import { DayTimeline } from "./DayTimeline";
 import {
   AppointmentModal,
   AppointmentFormResult,
@@ -35,7 +35,7 @@ import {
 } from "lucide-react";
 import { IconBadge } from "@/components/Icons";
 import { useEffect, useReducer } from "react";
-import { Id } from "../../../../convex/_generated/dataModel";
+import { Id } from "../../../../../convex/_generated/dataModel";
 import { useQueryStates } from "nuqs";
 import { agendaSearchParams } from "@/lib/search-params";
 import { DatePicker } from "@/components/ui/date-picker";

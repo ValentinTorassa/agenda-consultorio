@@ -2,8 +2,8 @@
 
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { api } from "../../../../../convex/_generated/api";
-import { Doc, Id } from "../../../../../convex/_generated/dataModel";
+import { api } from "../../../../../../convex/_generated/api";
+import { Doc, Id } from "../../../../../../convex/_generated/dataModel";
 import {
   Badge,
   Button,

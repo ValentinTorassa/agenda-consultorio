@@ -2,7 +2,7 @@
 
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { api } from "../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { TaskPanel } from "@/components/TaskPanel";
 import {
   AppointmentModal,
@@ -46,7 +46,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { useMemo, useReducer, useState } from "react";
-import { Id } from "../../../convex/_generated/dataModel";
+import { Id } from "../../../../convex/_generated/dataModel";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { useQueryState } from "nuqs";
