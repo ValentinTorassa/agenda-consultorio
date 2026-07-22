@@ -17,6 +17,9 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+
+  // React Compiler admite las directivas "use memo" y "use no memo" al
+  // comienzo del cuerpo de un componente o hook para controlar su memoización.
   reactCompiler: true,
   experimental: {
     typedEnv: true,
