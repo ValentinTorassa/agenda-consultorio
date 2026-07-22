@@ -7,12 +7,8 @@
     "dev:backend": "convex dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint src convex tests && npm --prefix mobile run lint",
+    "lint": "eslint src convex tests",
     "convex:deploy": "convex deploy",
-    "mobile": "npm --prefix mobile start",
-    "mobile:android": "npm --prefix mobile run android",
-    "mobile:ios": "npm --prefix mobile run ios",
-    "mobile:typecheck": "npm --prefix mobile exec tsc -- --noEmit",
     "test": "vitest run"
   },
   "dependencies": {

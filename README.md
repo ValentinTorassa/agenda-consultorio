@@ -10,7 +10,6 @@ Pensada para reemplazar la agenda en papel: turnos visuales, tareas del día, fi
 ## Stack
 
 - **Next.js 16** + TypeScript + Tailwind
-- **Expo / React Native** para Android, iPhone y tablet
 - **Convex** (base de datos reactiva, auth, crons, sync en tiempo real)
 - UI en **español (Argentina)**
 - PWA liviana (instalable en celular / iPad)
@@ -77,19 +76,6 @@ Abrí [http://localhost:3000](http://localhost:3000)
 2. La app siembra sola los tipos de turno y la configuración
 3. Empezá a cargar pacientes y turnos
 
-### 3. Arrancar la app mobile
-
-```bash
-cd mobile
-npm install
-cp .env.example .env.local
-cd ..
-npm run mobile
-```
-
-`EXPO_PUBLIC_CONVEX_URL` debe apuntar al mismo deployment Convex que usa la
-web. La cuenta, los turnos, pacientes y tareas se sincronizan automáticamente.
-
 ## Deploy (producción)
 
 ### Frontend → Vercel
@@ -138,9 +124,7 @@ custom domain del proyecto en Vercel.
 ```
 src/app/             # Aplicación web Next.js
 src/components/      # UI web
-mobile/src/app/      # Aplicación Expo Router
-mobile/src/components/ # UI nativa
-convex/              # Backend compartido y paquete @auralis/backend
+convex/              # Backend Convex
 ```
 
 ## Privacidad

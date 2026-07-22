@@ -18,8 +18,6 @@ import type * as migrations from "../migrations.js";
 import type * as patients from "../patients.js";
 import type * as psychiatrist from "../psychiatrist.js";
 import type * as psychiatristInternal from "../psychiatristInternal.js";
-import type * as pushNotifications from "../pushNotifications.js";
-import type * as pushTokens from "../pushTokens.js";
 import type * as reminders from "../reminders.js";
 import type * as seedDemo from "../seedDemo.js";
 import type * as settings from "../settings.js";
@@ -44,8 +42,6 @@ declare const fullApi: ApiFromModules<{
   patients: typeof patients;
   psychiatrist: typeof psychiatrist;
   psychiatristInternal: typeof psychiatristInternal;
-  pushNotifications: typeof pushNotifications;
-  pushTokens: typeof pushTokens;
   reminders: typeof reminders;
   seedDemo: typeof seedDemo;
   settings: typeof settings;

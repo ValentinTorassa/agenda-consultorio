@@ -88,15 +88,6 @@ export default defineSchema({
     .index("by_user_active", ["userId", "active", "dueAt"])
     .index("by_user_due", ["userId", "dueAt"]),
 
-  pushTokens: defineTable({
-    userId: v.id("users"),
-    token: v.string(),
-    platform: v.union(v.literal("ios"), v.literal("android")),
-    updatedAt: v.number(),
-  })
-    .index("by_user", ["userId"])
-    .index("by_token", ["token"]),
-
   settings: defineTable({
     userId: v.id("users"),
     workDayStart: v.string(),
