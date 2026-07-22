@@ -48,7 +48,7 @@ export function TaskPanel({
   });
   const isToday = Boolean(today) && date === today;
 
-  async function addTask(e: React.FormEvent<HTMLFormElement>) {
+  async function addTask(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);

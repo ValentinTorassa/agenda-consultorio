@@ -5,62 +5,23 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { useEffect, useId, useReducer, useRef, useState } from "react";
-import {
-  Button,
-  Input,
-  Label,
-  Modal,
-  Segmented,
-  Select,
-  Textarea,
-  WarningBox,
-} from "./ui";
-import { PatientPicker } from "./PatientPicker";
+import { Button, Modal } from "./ui";
 import {
   addDays,
   formatDateTime,
   parseLocalDateTime,
 } from "@/lib/utils";
-import { DatePicker } from "@/components/ui/date-picker";
 import { mergeFormState, readableError } from "@/lib/form-state";
-
-type Appt = {
-  _id: Id<"appointments">;
-  patientId?: Id<"patients">;
-  typeId: Id<"appointmentTypes">;
-  title?: string;
-  startTime: number;
-  endTime: number;
-  notes?: string;
-  paymentStatus: "paid" | "unpaid" | "owes" | "na";
-  paymentMethod?: string;
-  paymentNotes?: string;
-  status: "confirmed" | "cancelled" | "no_show" | "completed";
-  reminderEnabled: boolean;
-};
-
-type AppointmentState = {
-  patientId?: Id<"patients">;
-  typeId: string;
-  title: string;
-  date: string;
-  startTime: string;
-  endTime: string;
-  endsNextDay: boolean;
-  notes: string;
-  paymentStatus: Appt["paymentStatus"];
-  paymentMethod: string;
-  paymentNotes: string;
-  status: Appt["status"];
-  reminder: boolean;
-  recurrenceCount: 1 | 4 | 8 | 12;
-  duplicating: boolean;
-  showConflicts: boolean;
-  error: string;
-  errorControlId: string;
-  configInitialized: boolean;
-  endEdited: boolean;
-};
+import {
+  appointmentDateParts,
+  minutesToTime,
+  timeToMinutes,
+} from "@/lib/appointment-form";
+import { AppointmentFields } from "./appointment-form/AppointmentFormFields";
+import {
+  AppointmentRecord,
+  AppointmentState,
+} from "./appointment-form/types";
 
 export type AppointmentFormResult = {
   id: Id<"appointments">;
@@ -73,7 +34,7 @@ export type AppointmentFormResult = {
 };
 
 type AppointmentFormProps = {
-  initial?: Appt;
+  initial?: AppointmentRecord;
   defaultDate?: string;
   defaultTime?: string;
   defaultPatientId?: Id<"patients">;
@@ -131,34 +92,6 @@ export function AppointmentModal({
   );
 }
 
-function toDateParts(ms: number) {
-  const d = new Date(ms);
-  const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "America/Argentina/Buenos_Aires",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  }).formatToParts(d);
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  return {
-    date: `${get("year")}-${get("month")}-${get("day")}`,
-    time: `${get("hour")}:${get("minute")}`,
-  };
-}
-
-function timeToMin(t: string): number {
-  const [h, m] = t.split(":").map(Number);
-  return (h || 0) * 60 + (m || 0);
-}
-
-function minToTime(total: number): string {
-  const clamped = ((total % 1440) + 1440) % 1440;
-  return `${String(Math.floor(clamped / 60)).padStart(2, "0")}:${String(clamped % 60).padStart(2, "0")}`;
-}
-
 export function AppointmentForm({
   initial,
   defaultDate,
@@ -181,9 +114,9 @@ export function AppointmentForm({
   });
 
   const startParts = initial
-    ? toDateParts(initial.startTime)
+    ? appointmentDateParts(initial.startTime)
     : { date: defaultDate ?? "", time: defaultTime ?? "09:00" };
-  const endParts = initial ? toDateParts(initial.endTime) : null;
+  const endParts = initial ? appointmentDateParts(initial.endTime) : null;
 
   const [state, updateState] = useReducer(mergeFormState<AppointmentState>, {
     patientId: initial?.patientId ?? defaultPatientId,
@@ -227,23 +160,20 @@ export function AppointmentForm({
     duplicating,
     showConflicts,
     error,
-    errorControlId,
     configInitialized,
     endEdited,
   } = state;
-  const setPatientId = (patientId?: Id<"patients">) => updateState({ patientId });
   const setTypeId = (typeId: string) => updateState({ typeId });
-  const setTitle = (title: string) => updateState({ title });
   const setDate = (date: string) => updateState({ date });
   const setStartTime = (startTime: string) => updateState({ startTime });
   const setEndTime = (endTime: string) => updateState({ endTime });
   const setEndsNextDay = (endsNextDay: boolean) => updateState({ endsNextDay });
-  const setNotes = (notes: string) => updateState({ notes });
-  const setPaymentStatus = (paymentStatus: Appt["paymentStatus"]) =>
+  const setPaymentStatus = (
+    paymentStatus: AppointmentRecord["paymentStatus"],
+  ) =>
     updateState({ paymentStatus });
-  const setPaymentMethod = (paymentMethod: string) => updateState({ paymentMethod });
-  const setPaymentNotes = (paymentNotes: string) => updateState({ paymentNotes });
-  const setStatus = (status: Appt["status"]) => updateState({ status });
+  const setStatus = (status: AppointmentRecord["status"]) =>
+    updateState({ status });
   const setReminder = (reminder: boolean) => updateState({ reminder });
   const setRecurrenceCount = (recurrenceCount: 1 | 4 | 8 | 12) =>
     updateState({ recurrenceCount });
@@ -251,7 +181,6 @@ export function AppointmentForm({
   const setShowConflicts = (showConflicts: boolean) => updateState({ showConflicts });
   const setError = (error: string) => updateState({ error });
   const setErrorControlId = (errorControlId: string) => updateState({ errorControlId });
-  const setEndEdited = (endEdited: boolean) => updateState({ endEdited });
   const saving = create.isPending || update.isPending || remove.isPending;
   const submittingRef = useRef(false);
   const baselineRef = useRef<string | null>(null);
@@ -292,8 +221,8 @@ export function AppointmentForm({
       if (!endEdited) {
         const duration =
           defaultType.defaultDurationMin ?? settings?.defaultDurationMin ?? 50;
-        const nextEnd = timeToMin(startTime) + duration;
-        patch.endTime = minToTime(nextEnd);
+        const nextEnd = timeToMinutes(startTime) + duration;
+        patch.endTime = minutesToTime(nextEnd);
         patch.endsNextDay = nextEnd >= 1440;
       }
       updateState(patch);
@@ -378,12 +307,14 @@ export function AppointmentForm({
   function handleStartChange(next: string) {
     // Mantiene la duración corriendo el horario de fin junto con el de inicio.
     const rawDuration =
-      timeToMin(endTime) - timeToMin(startTime) + (endsNextDay ? 1440 : 0);
+      timeToMinutes(endTime) -
+      timeToMinutes(startTime) +
+      (endsNextDay ? 1440 : 0);
     const duration = Math.max(5, rawDuration);
     setStartTime(next);
     if (next) {
-      const nextEnd = timeToMin(next) + duration;
-      setEndTime(minToTime(nextEnd));
+      const nextEnd = timeToMinutes(next) + duration;
+      setEndTime(minutesToTime(nextEnd));
       setEndsNextDay(nextEnd >= 1440);
     }
   }
@@ -394,14 +325,14 @@ export function AppointmentForm({
     if (!nextType) return;
     const duration =
       nextType.defaultDurationMin ?? settings?.defaultDurationMin ?? 50;
-    const nextEnd = timeToMin(startTime) + duration;
-    setEndTime(minToTime(nextEnd));
+    const nextEnd = timeToMinutes(startTime) + duration;
+    setEndTime(minutesToTime(nextEnd));
     setEndsNextDay(nextEnd >= 1440);
     if (nextType.tracksPayment === false) setPaymentStatus("na");
     if (nextType.supportsReminder === false) setReminder(false);
   }
 
-  async function handleSubmit(allowConflict = false) {
+  async function saveAppointment(allowConflict = false) {
     if (!canSave || submittingRef.current) return;
     if (!selectedType) {
       showError("Elegí un tipo de actividad.", typeControlId);
@@ -421,7 +352,10 @@ export function AppointmentForm({
       );
       return;
     }
-    if (timeToMin(endTime) <= timeToMin(startTime) && !endsNextDay) {
+    if (
+      timeToMinutes(endTime) <= timeToMinutes(startTime) &&
+      !endsNextDay
+    ) {
       showError(
         "La hora de fin debe ser posterior. Si termina mañana, marcá ‘Finaliza al día siguiente’.",
         endControlId,
@@ -501,12 +435,14 @@ export function AppointmentForm({
     }
   }
 
+  function handleFormSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+    void saveAppointment();
+  }
+
   return (
     <form
-      onSubmit={(event) => {
-        event.preventDefault();
-        void handleSubmit();
-      }}
+      onSubmit={handleFormSubmit}
       className="space-y-4"
     >
       {!configResolved && (
@@ -514,240 +450,49 @@ export function AppointmentForm({
           Cargando tipos de actividad y configuración...
         </p>
       )}
-
-      <div>
-        <Label htmlFor={typeControlId}>Tipo de actividad</Label>
-        <Select
-          id={typeControlId}
-          value={effectiveTypeId}
-          onChange={(e) => handleTypeChange(e.target.value)}
-          required
-          autoFocus
-          disabled={!configResolved}
-          aria-invalid={errorControlId === typeControlId}
-          aria-describedby={errorControlId === typeControlId ? errorId : undefined}
-        >
-          {(types ?? []).map((t) => (
-            <option key={t._id} value={t._id}>
-              {t.name}
-            </option>
-          ))}
-        </Select>
-      </div>
-
-      {!editing && (
-        <div>
-          <Label htmlFor={recurrenceControlId}>Repetición semanal</Label>
-          <Select
-            id={recurrenceControlId}
-            value={recurrenceCount}
-            onChange={(event) =>
-              setRecurrenceCount(Number(event.target.value) as 1 | 4 | 8 | 12)
-            }
-          >
-            <option value={1}>Solo este turno</option>
-            <option value={4}>4 semanas</option>
-            <option value={8}>8 semanas</option>
-            <option value={12}>12 semanas</option>
-          </Select>
-          {recurrenceCount > 1 && (
-            <p className="mt-1.5 text-xs text-stone-500">
-              Se crearán {recurrenceCount} turnos, uno por semana, solo si todos
-              los horarios están disponibles.
-            </p>
-          )}
-        </div>
-      )}
-
-      {requiresPatient && (
-        <div>
-          <Label id={patientLabelId}>Paciente (obligatorio)</Label>
-          <PatientPicker
-            id={patientControlId}
-            aria-labelledby={patientLabelId}
-            aria-describedby={
-              errorControlId === patientControlId ? errorId : undefined
-            }
-            aria-invalid={errorControlId === patientControlId}
-            value={patientId}
-            onChange={(id) => setPatientId(id)}
-          />
-        </div>
-      )}
-
-      {requiresPatient && warnings && warnings.length > 0 && (
-        <WarningBox items={warnings} />
-      )}
-
-      <div>
-        <Label htmlFor={titleControlId}>
-          Título {requiresPatient ? "(opcional)" : "(obligatorio)"}
-        </Label>
-        <Input
-          id={titleControlId}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder={requiresPatient ? "Detalle opcional" : "Ej. Curso de capacitación"}
-          required={!requiresPatient}
-          aria-invalid={errorControlId === titleControlId}
-          aria-describedby={errorControlId === titleControlId ? errorId : undefined}
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <div className="col-span-2 sm:col-span-1">
-          <Label htmlFor={dateControlId}>Fecha</Label>
-          <DatePicker
-            id={dateControlId}
-            value={date}
-            onChange={setDate}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor={startControlId}>Desde</Label>
-          <Input
-            id={startControlId}
-            type="time"
-            value={startTime}
-            onChange={(e) => handleStartChange(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor={endControlId}>Hasta</Label>
-          <Input
-            id={endControlId}
-            type="time"
-            value={endTime}
-            onChange={(e) => {
-              setEndEdited(true);
-              setEndTime(e.target.value);
-            }}
-            required
-            aria-invalid={errorControlId === endControlId}
-            aria-describedby={errorControlId === endControlId ? errorId : undefined}
-          />
-        </div>
-      </div>
-
-      <label className="flex items-center gap-3 rounded-2xl border border-stone-200 px-3 py-2.5 transition hover:bg-stone-50">
-        <input
-          id={overnightControlId}
-          type="checkbox"
-          checked={endsNextDay}
-          onChange={(e) => setEndsNextDay(e.target.checked)}
-          className="h-5 w-5 rounded border-stone-300 accent-teal-700"
-        />
-        <span className="text-sm text-stone-700">Finaliza al día siguiente</span>
-      </label>
-      {endTime && timeToMin(endTime) <= timeToMin(startTime) && !endsNextDay && (
-        <p role="alert" className="text-sm text-amber-700">
-          El fin no puede ser anterior al inicio, salvo que finalice mañana.
-        </p>
-      )}
-
-      <div>
-        <Label htmlFor={notesControlId}>Observaciones</Label>
-        <Textarea
-          id={notesControlId}
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="Confirmar día anterior, traer informe..."
-        />
-      </div>
-
-      {tracksPayment && (
-        <div>
-          <Label id={paymentLabelId}>Pago</Label>
-          <Segmented
-            aria-labelledby={paymentLabelId}
-            value={paymentStatus}
-            onChange={setPaymentStatus}
-            options={[
-              {
-                value: "unpaid",
-                label: "Pendiente",
-                activeClass: "text-rose-700",
-              },
-              { value: "paid", label: "Pagó", activeClass: "text-teal-700" },
-              { value: "owes", label: "Debe", activeClass: "text-amber-700" },
-              { value: "na", label: "N/A" },
-            ]}
-          />
-        </div>
-      )}
-
-      {tracksPayment && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div>
-            <Label htmlFor={paymentMethodControlId}>Forma de pago</Label>
-            <Input
-              id={paymentMethodControlId}
-              value={paymentMethod}
-              onChange={(e) => setPaymentMethod(e.target.value)}
-              placeholder="Efectivo, transferencia..."
-            />
-          </div>
-          <div>
-            <Label htmlFor={paymentNotesControlId}>Nota de pago</Label>
-            <Input
-              id={paymentNotesControlId}
-              value={paymentNotes}
-              onChange={(e) => setPaymentNotes(e.target.value)}
-              placeholder="Observación rápida"
-            />
-          </div>
-        </div>
-      )}
-
-      {initial && (
-        <div>
-          <Label id={statusLabelId}>Estado</Label>
-          <Segmented
-            aria-labelledby={statusLabelId}
-            value={status}
-            onChange={setStatus}
-            options={[
-              {
-                value: "confirmed",
-                label: "Confirmado",
-                activeClass: "text-teal-700",
-              },
-              {
-                value: "completed",
-                label: "Realizado",
-                activeClass: "text-emerald-700",
-              },
-              {
-                value: "cancelled",
-                label: "Cancelado",
-                activeClass: "text-rose-700",
-              },
-              {
-                value: "no_show",
-                label: "Ausente",
-                activeClass: "text-amber-700",
-              },
-            ]}
-          />
-        </div>
-      )}
-
-      {supportsReminder && (
-        <label className="flex items-center gap-3 rounded-2xl border border-stone-200 px-3 py-3 transition hover:bg-stone-50">
-          <input
-            id={reminderControlId}
-            type="checkbox"
-            checked={reminder}
-            onChange={(e) => setReminder(e.target.checked)}
-            className="h-5 w-5 rounded border-stone-300 accent-teal-700"
-          />
-          <span className="text-sm text-stone-700">
-            Recordarme avisar al paciente (24 h antes)
-          </span>
-        </label>
-      )}
+      <AppointmentFields.Provider
+        value={{
+          state,
+          actions: {
+            update: updateState,
+            changeType: handleTypeChange,
+            changeStart: handleStartChange,
+          },
+          meta: {
+            types,
+            warnings,
+            ids: {
+              type: typeControlId,
+              recurrence: recurrenceControlId,
+              patientLabel: patientLabelId,
+              patient: patientControlId,
+              title: titleControlId,
+              date: dateControlId,
+              start: startControlId,
+              end: endControlId,
+              overnight: overnightControlId,
+              notes: notesControlId,
+              paymentLabel: paymentLabelId,
+              paymentMethod: paymentMethodControlId,
+              paymentNotes: paymentNotesControlId,
+              statusLabel: statusLabelId,
+              reminder: reminderControlId,
+              error: errorId,
+            },
+            configResolved,
+            editing,
+            showStatus: Boolean(initial),
+            requiresPatient,
+            tracksPayment,
+            supportsReminder,
+          },
+        }}
+      >
+        <AppointmentFields.Identity />
+        <AppointmentFields.Schedule />
+        <AppointmentFields.Payment />
+        <AppointmentFields.StatusAndReminder />
+      </AppointmentFields.Provider>
 
       {error && (
         <p
@@ -779,7 +524,7 @@ export function AppointmentForm({
             size="sm"
             className="mt-3"
             disabled={saving}
-            onClick={() => void handleSubmit(true)}
+            onClick={() => void saveAppointment(true)}
           >
             Guardar de todos modos
           </Button>

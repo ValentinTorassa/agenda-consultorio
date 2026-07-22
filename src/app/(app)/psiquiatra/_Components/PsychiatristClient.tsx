@@ -21,6 +21,7 @@ import { PatientPicker } from "@/components/PatientPicker";
 import { Button, Card, Empty, Label, Modal } from "@/components/ui";
 import { formatDateTime } from "@/lib/utils";
 import { mergeFormState } from "@/lib/form-state";
+import { actionErrorMessage } from "./helpers";
 
 type PsychiatristState = {
   actionId: Id<"psychiatristSlots"> | null;
@@ -30,12 +31,6 @@ type PsychiatristState = {
   message: string;
   error: string;
 };
-
-function errorMessage(error: unknown) {
-  const message =
-    error instanceof Error ? error.message : "No se pudo completar la acción";
-  return message.split("Uncaught Error: ").pop()?.split("\n")[0] ?? message;
-}
 
 export function PsychiatristClient() {
   const { data: slots = [] } = useQuery(
@@ -98,7 +93,7 @@ export function PsychiatristClient() {
             : "Los horarios ya estaban actualizados.",
       );
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(actionErrorMessage(caught));
     }
   }
 
@@ -124,7 +119,7 @@ export function PsychiatristClient() {
       setAssignId(null);
       setPatientId(undefined);
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(actionErrorMessage(caught));
     } finally {
       setActionId(null);
     }
@@ -154,7 +149,7 @@ export function PsychiatristClient() {
             : "Horario disponible nuevamente.",
       );
     } catch (caught) {
-      setError(errorMessage(caught));
+      setError(actionErrorMessage(caught));
     } finally {
       setActionId(null);
     }

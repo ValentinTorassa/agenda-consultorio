@@ -28,46 +28,7 @@ import { debounce, useQueryState } from "nuqs";
 import { patientListSearchParams } from "@/lib/search-params";
 import { mergeFormState, readableError } from "@/lib/form-state";
 import { DatePicker } from "@/components/ui/date-picker";
-
-const CARE_TYPES = [
-  "Consultorio",
-  "Pericia",
-  "Psiquiatría",
-  "Armas / CLU",
-  "Otro",
-];
-
-const CARE_STYLES: Record<string, string> = {
-  Consultorio: "bg-teal-50 text-teal-700 ring-teal-200/70",
-  Pericia: "bg-violet-50 text-violet-700 ring-violet-200/70",
-  Psiquiatría: "bg-amber-50 text-amber-700 ring-amber-200/70",
-  "Armas / CLU": "bg-orange-50 text-orange-800 ring-orange-200/70",
-  Otro: "bg-stone-100 text-stone-600 ring-stone-200/70",
-};
-
-const AVATAR_COLORS = [
-  "bg-teal-600",
-  "bg-amber-500",
-  "bg-violet-500",
-  "bg-emerald-600",
-  "bg-rose-500",
-  "bg-sky-600",
-];
-
-function initials(name: string): string {
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase())
-    .join("");
-}
-
-function avatarColor(name: string): string {
-  let hash = 0;
-  for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) % 997;
-  return AVATAR_COLORS[hash % AVATAR_COLORS.length];
-}
+import { avatarColor, CARE_STYLES, CARE_TYPES, initials } from "./helpers";
 
 type NewPatientDraft = {
   fullName: string;
@@ -135,7 +96,7 @@ export function PatientsClient() {
     );
   }, [patients, q]);
 
-  async function handleCreate(e: React.FormEvent) {
+  async function handleCreate(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     create.reset();
     try {

@@ -3,17 +3,13 @@
 import { convexQuery, useConvexMutation } from "@convex-dev/react-query";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api } from "../../../../../../convex/_generated/api";
-import { Doc, Id } from "../../../../../../convex/_generated/dataModel";
+import { Id } from "../../../../../../convex/_generated/dataModel";
 import {
   Badge,
   Button,
   Card,
   Empty,
-  Input,
-  Label,
-  Select,
   Skeleton,
-  Textarea,
   WarningBox,
 } from "@/components/ui";
 import {
@@ -27,7 +23,6 @@ import {
   CalendarClock,
   CalendarPlus,
   MessageCircle,
-  Save,
   Wallet,
   XCircle,
 } from "lucide-react";
@@ -36,127 +31,8 @@ import {
   AppointmentFormResult,
 } from "@/components/AppointmentForm";
 import Link from "next/link";
-import { useReducer, useState } from "react";
-import { mergeFormState, readableError } from "@/lib/form-state";
-import { DatePicker } from "@/components/ui/date-picker";
-
-type PatientDraft = {
-  fullName: string;
-  phone: string;
-  birthDate: string;
-  careType: string;
-  adminNotes: string;
-  saving: boolean;
-  saved: boolean;
-  error: string;
-};
-
-function PatientForm({
-  id,
-  patient,
-}: {
-  id: Id<"patients">;
-  patient: Doc<"patients">;
-}) {
-  const update = useMutation({
-    mutationFn: useConvexMutation(api.patients.update),
-  });
-  const [draft, updateDraft] = useReducer(mergeFormState<PatientDraft>, {
-    fullName: patient.fullName,
-    phone: patient.phone ?? "",
-    birthDate: patient.birthDate ?? "",
-    careType: patient.careType,
-    adminNotes: patient.adminNotes ?? "",
-    saving: false,
-    saved: false,
-    error: "",
-  });
-  const { fullName, phone, birthDate, careType, adminNotes, saving, saved, error } = draft;
-
-  async function handleSave(e: React.FormEvent) {
-    e.preventDefault();
-    updateDraft({ saving: true, saved: false, error: "" });
-    try {
-      await update.mutateAsync({
-        id,
-        fullName: fullName.trim(),
-        phone,
-        birthDate,
-        careType,
-        adminNotes,
-      });
-      updateDraft({ saved: true });
-    } catch (caught) {
-      updateDraft({ error: readableError(caught, "No se pudo guardar.") });
-    } finally {
-      updateDraft({ saving: false });
-    }
-  }
-
-  return (
-    <form onSubmit={handleSave} className="space-y-4">
-      <div>
-        <Label htmlFor="patient-detail-name">Nombre y apellido</Label>
-        <Input
-          id="patient-detail-name"
-          value={fullName}
-          onChange={(e) => updateDraft({ fullName: e.target.value })}
-          required
-        />
-      </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <div>
-          <Label htmlFor="patient-detail-phone">Teléfono</Label>
-          <Input
-            id="patient-detail-phone"
-            value={phone}
-            onChange={(e) => updateDraft({ phone: e.target.value })}
-          />
-        </div>
-        <div>
-          <Label htmlFor="patient-detail-birth-date">Nacimiento</Label>
-          <DatePicker
-            id="patient-detail-birth-date"
-            value={birthDate}
-            onChange={(birthDate) => updateDraft({ birthDate })}
-          />
-        </div>
-      </div>
-      <div>
-        <Label htmlFor="patient-detail-care-type">Tipo de atención</Label>
-        <Select
-          id="patient-detail-care-type"
-          value={careType}
-          onChange={(e) => updateDraft({ careType: e.target.value })}
-        >
-          {["Consultorio", "Pericia", "Psiquiatría", "Armas / CLU", "Otro"].map((t) => (
-            <option key={t} value={t}>
-              {t}
-            </option>
-          ))}
-        </Select>
-      </div>
-      <div>
-        <Label htmlFor="patient-detail-admin-notes">
-          Observaciones administrativas
-        </Label>
-        <Textarea
-          id="patient-detail-admin-notes"
-          value={adminNotes}
-          onChange={(e) => updateDraft({ adminNotes: e.target.value })}
-        />
-      </div>
-      <div className="flex items-center gap-3">
-        <Button type="submit" disabled={saving}>
-          <Save className="h-4 w-4" />
-          {saving ? "Guardando..." : "Guardar"}
-        </Button>
-        {saved && <span className="text-sm text-teal-700">Guardado ✓</span>}
-      </div>
-      {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}
-    </form>
-  );
-}
+import { useState } from "react";
+import { PatientForm } from "./PatientForm";
 
 export function PatientDetailClient({ id: rawId }: { id: string }) {
   const id = rawId as Id<"patients">;

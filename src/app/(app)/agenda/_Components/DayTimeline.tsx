@@ -9,57 +9,10 @@ import { cn, formatTime, getCalendarRange, minutesInDay } from "@/lib/utils";
 import { useNow } from "@/lib/useNow";
 import { Badge } from "@/components/ui";
 import { useEffect, useRef } from "react";
-
-type Appt = {
-  _id: string;
-  startTime: number;
-  endTime: number;
-  status: string;
-  paymentStatus: string;
-  notes?: string;
-  title?: string;
-  type?: { name: string; color: string } | null;
-  patient?: { fullName: string } | null;
-};
+import { layoutTimelineLanes, TimelineAppointment } from "./helpers";
 
 const HOUR_HEIGHT = 88;
 const PIXELS_PER_MINUTE = HOUR_HEIGHT / 60;
-
-function layoutLanes(appointments: Appt[]) {
-  const sorted = [...appointments].sort(
-    (a, b) => a.startTime - b.startTime || a.endTime - b.endTime,
-  );
-  const placed: { appt: Appt; lane: number; laneCount: number }[] = [];
-  let cluster: { appt: Appt; lane: number }[] = [];
-  let laneEnds: number[] = [];
-  let clusterEnd = -Infinity;
-
-  const flush = () => {
-    const laneCount = laneEnds.length || 1;
-    for (const item of cluster) placed.push({ ...item, laneCount });
-    cluster = [];
-    laneEnds = [];
-  };
-
-  for (const appt of sorted) {
-    if (appt.startTime >= clusterEnd) {
-      flush();
-      clusterEnd = appt.endTime;
-    } else {
-      clusterEnd = Math.max(clusterEnd, appt.endTime);
-    }
-    let lane = laneEnds.findIndex((end) => end <= appt.startTime);
-    if (lane === -1) {
-      lane = laneEnds.length;
-      laneEnds.push(appt.endTime);
-    } else {
-      laneEnds[lane] = appt.endTime;
-    }
-    cluster.push({ appt, lane });
-  }
-  flush();
-  return placed;
-}
 
 export function DayTimeline({
   appointments,
@@ -71,7 +24,7 @@ export function DayTimeline({
   highlightedId,
   date,
 }: {
-  appointments: Appt[];
+  appointments: TimelineAppointment[];
   date: string;
   onSelect: (id: string) => void;
   onSlotClick?: (hour: number, minute?: number) => void;
@@ -130,7 +83,7 @@ export function DayTimeline({
     });
   }, [appointmentIds, highlightedId]);
 
-  const placed = layoutLanes(appointments);
+  const placed = layoutTimelineLanes(appointments);
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-stone-200/90 bg-white shadow-sm">

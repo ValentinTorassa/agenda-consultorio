@@ -8,23 +8,18 @@ import {
   AppointmentModal,
   AppointmentFormResult,
 } from "@/components/AppointmentForm";
-import { PatientPicker } from "@/components/PatientPicker";
 import {
   Badge,
   Button,
   Card,
   Empty,
-  Input,
-  Label,
   Modal,
   Skeleton,
-  Textarea,
 } from "@/components/ui";
 import { IconBadge } from "@/components/Icons";
 import {
   formatDateLong,
   formatTime,
-  parseLocalDateTime,
   paymentLabel,
   shouldShowPaymentAsDebt,
   todayKey,
@@ -45,130 +40,20 @@ import {
   SunMedium,
   Wallet,
 } from "lucide-react";
-import { useMemo, useReducer, useState } from "react";
+import { useMemo, useState } from "react";
 import { Id } from "../../../../convex/_generated/dataModel";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { useQueryState } from "nuqs";
 import { homeTaskSearchParams } from "@/lib/search-params";
-import { mergeFormState, readableError } from "@/lib/form-state";
-import { DatePicker } from "@/components/ui/date-picker";
-
-function greeting(now: number): string {
-  if (now === 0) return "Hoy";
-  const hour = Number(
-    new Intl.DateTimeFormat("en-GB", {
-      timeZone: "America/Argentina/Buenos_Aires",
-      hour: "2-digit",
-      hour12: false,
-    }).format(new Date(now)),
-  );
-  if (hour < 13) return "Buen día";
-  if (hour < 20) return "Buenas tardes";
-  return "Buenas noches";
-}
-
-type ReminderDraft = {
-  message: string;
-  patientId?: Id<"patients">;
-  date: string;
-  time: string;
-  saving: boolean;
-  error: string;
-};
+import { greeting } from "./helpers";
+import { NewReminderForm } from "./NewReminderForm";
 
 type ActiveDialog =
   | { kind: "new-appointment" }
   | { kind: "new-reminder" }
   | { kind: "edit-appointment"; id: Id<"appointments"> }
   | null;
-
-function NewReminderForm({ onDone }: { onDone: () => void }) {
-  const createReminder = useMutation({
-    mutationFn: useConvexMutation(api.reminders.create),
-  });
-  const [draft, updateDraft] = useReducer(mergeFormState<ReminderDraft>, {
-    message: "",
-    patientId: undefined,
-    date: todayKey(),
-    time: "09:00",
-    saving: false,
-    error: "",
-  });
-  const { message, patientId, date, time, saving, error } = draft;
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (!message.trim()) return;
-    updateDraft({ saving: true, error: "" });
-    try {
-      await createReminder.mutateAsync({
-        message: message.trim(),
-        patientId,
-        dueAt: parseLocalDateTime(date, time),
-      });
-      onDone();
-    } catch (caught) {
-      updateDraft({ error: readableError(caught, "No se pudo crear el aviso.") });
-    } finally {
-      updateDraft({ saving: false });
-    }
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <Label htmlFor="new-reminder-message">Mensaje</Label>
-        <Textarea
-          id="new-reminder-message"
-          value={message}
-          onChange={(e) => updateDraft({ message: e.target.value })}
-          placeholder="Ej. Confirmar turno, pedir informe..."
-          autoFocus
-          required
-        />
-      </div>
-      <div>
-        <Label id="new-reminder-patient-label">Paciente (opcional)</Label>
-        <PatientPicker
-          id="new-reminder-patient"
-          aria-labelledby="new-reminder-patient-label"
-          value={patientId}
-          onChange={(patientId) => updateDraft({ patientId })}
-        />
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <Label htmlFor="new-reminder-date">Fecha</Label>
-          <DatePicker
-            id="new-reminder-date"
-            value={date}
-            onChange={(date) => updateDraft({ date })}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="new-reminder-time">Hora</Label>
-          <Input
-            id="new-reminder-time"
-            type="time"
-            value={time}
-            onChange={(e) => updateDraft({ time: e.target.value })}
-            required
-          />
-        </div>
-      </div>
-      <Button
-        type="submit"
-        className="w-full"
-        disabled={saving || !message.trim()}
-      >
-        {saving ? "Guardando..." : "Crear aviso"}
-      </Button>
-      {error && <p role="alert" className="text-sm text-rose-700">{error}</p>}
-    </form>
-  );
-}
 
 export function HomeClient() {
   const date = todayKey();
